@@ -52,7 +52,7 @@ interface AIResultCheckDialogProps {
 }
 
 // ФЛАГ ДЛЯ ТЕСТИРОВАНИЯ: 1 - требует доработки (68%), 2 - принято (100%)
-const AI_CHECK_FLAG = 2 // <-- Измените на 1 для теста с оценкой 68%
+const AI_CHECK_FLAG = 1 // <-- Измените на 1 для теста с оценкой 68%
 
 export default function AIResultCheckDialog({
   task,
