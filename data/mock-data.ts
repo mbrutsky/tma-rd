@@ -163,7 +163,7 @@ export const mockUsers: User[] = [
   },
 ]
 
-export const currentUser = mockUsers[0]
+export const currentUser = mockUsers[1]
 
 export const mockDepartments: Department[] = [
   {
