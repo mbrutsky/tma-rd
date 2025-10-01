@@ -1,6 +1,6 @@
 // src/lib/store/api/telegramGroupsApi.ts
-import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
-import { currentUserId } from "../../app.config";
+import { createApi } from "@reduxjs/toolkit/query/react";
+import { baseQueryWithAuth } from './baseQuery';
 
 export interface TelegramGroup {
   id: string;
@@ -24,14 +24,7 @@ export interface UpdateTelegramGroupRequest {
 
 export const telegramGroupsApi = createApi({
   reducerPath: "telegramGroupsApi",
-  baseQuery: fetchBaseQuery({
-    baseUrl: "/api/",
-    prepareHeaders: (headers, { getState }) => {
-        // ! tO-DO
-      headers.set("x-user-id", currentUserId);
-      return headers;
-    },
-  }),
+  baseQuery: baseQueryWithAuth,
   tagTypes: ["TelegramGroup"],
   endpoints: (builder) => ({
     getTelegramGroups: builder.query<TelegramGroup[], void>({

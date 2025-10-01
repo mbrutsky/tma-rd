@@ -1,6 +1,6 @@
-import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
+import { createApi } from '@reduxjs/toolkit/query/react';
 import { DatabaseFeedback, FeedbackType } from '@/src/lib/models/types';
-import { currentUserId } from '../../app.config';
+import { baseQueryWithAuth } from './baseQuery';
 
 interface CreateFeedbackRequest {
   type: FeedbackType;
@@ -27,14 +27,7 @@ function transformFeedback(item: any): DatabaseFeedback {
 
 export const feedbackApi = createApi({
   reducerPath: 'feedbackApi',
-  baseQuery: fetchBaseQuery({
-    baseUrl: '/api/',
-    prepareHeaders: (headers, { getState }) => {
-      // ! To-Do
-      headers.set('x-user-id', currentUserId);
-      return headers;
-    },
-  }),
+  baseQuery: baseQueryWithAuth,
   tagTypes: ['Feedback'],
   endpoints: (builder) => ({
     getFeedback: builder.query<DatabaseFeedback[], {

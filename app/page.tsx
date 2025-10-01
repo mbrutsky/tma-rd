@@ -12,7 +12,6 @@ import {
   DatabaseUser,
   DatabaseBusinessProcess,
   DatabaseHistoryEntry,
-  UserRole,
   TaskStatus,
 } from "../src/lib/models/types";
 import {
@@ -32,7 +31,8 @@ import {
 import { useGetUsersQuery } from "../src/lib/store/api/usersApi";
 import { Button } from "../src/components/ui/button";
 import LoadingScreen from "@/src/components/LoadingScreen";
-import { currentUserId } from "@/src/lib/app.config";
+import { useAppSelector } from "@/src/lib/store/hooks";
+import { selectCurrentUser } from "@/src/lib/store/slices/authSlice";
 
 // Импортируем новый компонент загрузки
 
@@ -243,31 +243,7 @@ export default function TasksApp() {
   const isLoading = tasksLoading || usersLoading || processesLoading;
   const hasErrors = tasksError || usersError || processesError;
 
-  // ! To-Do
-  // Мемоизированный текущий пользователь
-  const currentUser = useMemo(() => {
-    return (
-      users.find((user) => user.id === currentUserId) || {
-        id: currentUserId,
-        name: "Анна Иванова",
-        username: "anna_ivanova",
-        avatar: "/5.jpg",
-        role: UserRole.DIRECTOR,
-        position: "Директор",
-        email: "anna.ivanova@company.com",
-        phone: "+7 (999) 123-45-67",
-        is_active: true,
-        simplified_control: false,
-        notification_settings: {
-          email: true,
-          telegram: true,
-          realTime: true,
-        },
-        created_at: new Date(),
-        updated_at: new Date(),
-      }
-    );
-  }, [users]);
+  const currentUser = useAppSelector(selectCurrentUser);
 
   // API mutations - мемоизированы для избежания пересоздания
   const [createTask] = useCreateTaskMutation();
@@ -512,7 +488,7 @@ export default function TasksApp() {
   }
 
   // Show error state
-  if (hasErrors) {
+  if (hasErrors || !currentUser) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center max-w-md mx-auto px-6">

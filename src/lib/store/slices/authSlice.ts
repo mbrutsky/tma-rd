@@ -2,22 +2,10 @@
 
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import type { RootState } from '../index';
-
-interface AuthUser {
-  id: string;
-  telegramUserId?: number;
-  name: string;
-  username: string;
-  avatar?: string;
-  role: string;
-  position?: string;
-  email?: string;
-  companyId?: string;
-  isActive: boolean;
-}
+import { DatabaseUser } from '@/src/lib/models/types';
 
 interface AuthState {
-  user: AuthUser | null;
+  user: DatabaseUser | null;
   token: string | null;
   isAuthenticated: boolean;
   loading: boolean;
@@ -56,7 +44,29 @@ export const authenticateWithTelegram = createAsyncThunk(
     localStorage.setItem('currentUser', JSON.stringify(data.user));
     localStorage.setItem('userId', data.user.id);
     
-    return data;
+    // Преобразуем user в формат DatabaseUser
+    const dbUser: DatabaseUser = {
+      id: data.user.id,
+      name: data.user.name,
+      username: data.user.username,
+      avatar: data.user.avatar,
+      role: data.user.role as any,
+      position: data.user.position,
+      email: data.user.email,
+      phone: data.user.phone,
+      is_active: data.user.isActive,
+      company_id: data.user.companyId,
+      simplified_control: false,
+      notification_settings: {
+        email: true,
+        telegram: true,
+        realTime: true
+      },
+      created_at: new Date(),
+      updated_at: new Date()
+    };
+    
+    return { ...data, user: dbUser };
   }
 );
 
@@ -81,9 +91,33 @@ export const verifyToken = createAsyncThunk(
     }
 
     const userData = localStorage.getItem('currentUser');
+    const parsedUser = userData ? JSON.parse(userData) : null;
+    
+    // Преобразуем сохраненного пользователя в формат DatabaseUser
+    const dbUser: DatabaseUser | null = parsedUser ? {
+      id: parsedUser.id,
+      name: parsedUser.name,
+      username: parsedUser.username,
+      avatar: parsedUser.avatar,
+      role: parsedUser.role as any,
+      position: parsedUser.position,
+      email: parsedUser.email,
+      phone: parsedUser.phone,
+      is_active: parsedUser.isActive || parsedUser.is_active || true,
+      company_id: parsedUser.companyId || parsedUser.company_id,
+      simplified_control: parsedUser.simplified_control || false,
+      notification_settings: parsedUser.notification_settings || {
+        email: true,
+        telegram: true,
+        realTime: true
+      },
+      created_at: new Date(parsedUser.created_at || Date.now()),
+      updated_at: new Date(parsedUser.updated_at || Date.now())
+    } : null;
+    
     return {
       token,
-      user: userData ? JSON.parse(userData) : null
+      user: dbUser
     };
   }
 );
@@ -110,7 +144,7 @@ const authSlice = createSlice({
     clearError: (state) => {
       state.error = null;
     },
-    updateUser: (state, action: PayloadAction<Partial<AuthUser>>) => {
+    updateUser: (state, action: PayloadAction<Partial<DatabaseUser>>) => {
       if (state.user) {
         state.user = { ...state.user, ...action.payload };
         localStorage.setItem('currentUser', JSON.stringify(state.user));

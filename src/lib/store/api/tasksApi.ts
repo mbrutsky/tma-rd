@@ -1,4 +1,4 @@
-import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
+import { createApi } from "@reduxjs/toolkit/query/react";
 import {
   CreateTaskRequest,
   DatabaseChecklistItem,
@@ -6,7 +6,7 @@ import {
   DatabaseTask,
   UpdateTaskRequest,
 } from "@/src/lib/models/types";
-import { currentUserId } from "../../app.config";
+import { baseQueryWithAuth } from './baseQuery';
 
 // Transform database task to frontend task format
 function transformDatabaseTaskToFrontend(dbTask: any): DatabaseTask {
@@ -142,14 +142,7 @@ function transformComment(item: any): DatabaseComment {
 
 export const tasksApi = createApi({
   reducerPath: "tasksApi",
-  baseQuery: fetchBaseQuery({
-    baseUrl: "/api/",
-    prepareHeaders: (headers, { getState }) => {
-      // ! To-Do
-      headers.set("x-user-id", currentUserId);
-      return headers;
-    },
-  }),
+  baseQuery: baseQueryWithAuth,
   tagTypes: ["Task", "Comment", "Checklist"],
   endpoints: (builder) => ({
     getTasks: builder.query<
@@ -175,13 +168,12 @@ export const tasksApi = createApi({
           processId: params.processId,
           overdue: params.overdue?.toString(),
           almostOverdue: params.almostOverdue?.toString(),
-          // includeDeleted: "true",
           includeDeleted: params.includeDeleted?.toString() || "false",
         },
       }),
       transformResponse: (response: { success: boolean; data: any[] }) => {
-            const transformed = response.data.map(transformDatabaseTaskToFrontend);
-            return transformed;
+        const transformed = response.data.map(transformDatabaseTaskToFrontend);
+        return transformed;
       },
       providesTags: (result) =>
         result
@@ -192,9 +184,7 @@ export const tasksApi = createApi({
           : [{ type: "Task", id: "LIST" }],
     }),
 
-    // Остальные существующие endpoints без изменений...
     getTask: builder.query<DatabaseTask, string>({
-      
       query: (id) => `tasks/${id}`,
       transformResponse: (response: { success: boolean; data: any }) => {
         return transformDatabaseTaskToFrontend(response.data);
@@ -324,7 +314,7 @@ export const tasksApi = createApi({
       { taskId: string; text: string; isResult: boolean }
     >({
       query: ({ taskId, text, isResult }) => ({
-        url: `tasks/${taskId}/comments`, // Убираем ведущий слеш
+        url: `tasks/${taskId}/comments`,
         method: "POST",
         body: { text, isResult },
       }),
@@ -345,7 +335,7 @@ export const tasksApi = createApi({
       { taskId: string; commentId: string; text: string }
     >({
       query: ({ taskId, commentId, text }) => ({
-        url: `tasks/${taskId}/comments/${commentId}`, // Убираем ведущий слеш
+        url: `tasks/${taskId}/comments/${commentId}`,
         method: "PUT",
         body: { text },
       }),
@@ -367,7 +357,7 @@ export const tasksApi = createApi({
       { taskId: string; commentId: string }
     >({
       query: ({ taskId, commentId }) => ({
-        url: `tasks/${taskId}/comments/${commentId}`, // Убираем ведущий слеш
+        url: `tasks/${taskId}/comments/${commentId}`,
         method: "DELETE",
       }),
       invalidatesTags: (result, error, { taskId, commentId }) => [
@@ -378,7 +368,7 @@ export const tasksApi = createApi({
     }),
 
     getTaskComments: builder.query<DatabaseComment[], string>({
-      query: (taskId) => `tasks/${taskId}/comments`, // Убираем ведущий слеш
+      query: (taskId) => `tasks/${taskId}/comments`,
       transformResponse: (response: { success: boolean; data: any[] }) => {
         if (!response.success) {
           throw new Error("Failed to fetch comments");
@@ -440,6 +430,7 @@ export const tasksApi = createApi({
         { taskId, text, level = 0 },
         { dispatch, queryFulfilled }
       ) {
+        const currentUserId = localStorage.getItem('userId') || '';
         const patchResult = dispatch(
           tasksApi.util.updateQueryData("getTaskChecklist", taskId, (draft) => {
             const optimisticItem: DatabaseChecklistItem = {
@@ -448,7 +439,6 @@ export const tasksApi = createApi({
               text,
               completed: false,
               created_at: new Date(),
-              // ! To-Do
               created_by: currentUserId,
               level,
               item_order: draft.length + 1,
@@ -490,6 +480,7 @@ export const tasksApi = createApi({
         { taskId, itemId, text, completed },
         { dispatch, queryFulfilled }
       ) {
+        const currentUserId = localStorage.getItem('userId') || '';
         const patchResult = dispatch(
           tasksApi.util.updateQueryData("getTaskChecklist", taskId, (draft) => {
             const item = draft.find((item) => item.id === itemId);
@@ -498,10 +489,7 @@ export const tasksApi = createApi({
               if (completed !== undefined) {
                 item.completed = completed;
                 item.completed_at = completed ? new Date() : undefined;
-                item.completed_by = completed
-                // ! TO-dO
-                  ? currentUserId
-                  : undefined;
+                item.completed_by = completed ? currentUserId : undefined;
               }
             }
           })

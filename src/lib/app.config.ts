@@ -47,4 +47,4 @@ export const config = {
 // Анна Иванова   550e8400-e29b-41d4-a716-446655440001
 // Максим Бруцкий 380a4cb2-c953-4d34-a00f-4f94c47adb31
 // Алексей Петров 550e8400-e29b-41d4-a716-446655440002
-export const currentUserId = "380a4cb2-c953-4d34-a00f-4f94c47adb31";
+// export const currentUserId = "380a4cb2-c953-4d34-a00f-4f94c47adb31";

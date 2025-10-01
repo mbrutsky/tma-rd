@@ -1,35 +1,28 @@
-import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
+import { createApi } from '@reduxjs/toolkit/query/react';
 import { DatabaseUser, CreateUserRequest } from '@/src/lib/models/types';
-import { currentUserId } from '../../app.config';
+import { baseQueryWithAuth } from './baseQuery';
 
 function transformDatabaseUserToFrontend(dbUser: DatabaseUser): DatabaseUser {
   return {
-  id: dbUser.id,
-  name: dbUser.name,
-  username: dbUser.username,
-  avatar: dbUser.avatar,
-  role: dbUser.role as any,
-  position: dbUser.position,
-  email: dbUser.email,
-  phone: dbUser.phone,
-  is_active: dbUser.is_active,
-  simplified_control: dbUser.simplified_control,
-  notification_settings: dbUser.notification_settings,
-  created_at: dbUser.created_at,
-  updated_at: dbUser.updated_at
-};
+    id: dbUser.id,
+    name: dbUser.name,
+    username: dbUser.username,
+    avatar: dbUser.avatar,
+    role: dbUser.role as any,
+    position: dbUser.position,
+    email: dbUser.email,
+    phone: dbUser.phone,
+    is_active: dbUser.is_active,
+    simplified_control: dbUser.simplified_control,
+    notification_settings: dbUser.notification_settings,
+    created_at: dbUser.created_at,
+    updated_at: dbUser.updated_at
+  };
 }
 
 export const usersApi = createApi({
   reducerPath: 'usersApi',
-  baseQuery: fetchBaseQuery({
-    baseUrl: '/api/',
-    prepareHeaders: (headers, { getState }) => {
-      // ! tO-do
-      headers.set('x-user-id', currentUserId);
-      return headers;
-    },
-  }),
+  baseQuery: baseQueryWithAuth,
   tagTypes: ['User'],
   endpoints: (builder) => ({
     getUsers: builder.query<DatabaseUser[], { active?: boolean }>({

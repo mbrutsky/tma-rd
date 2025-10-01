@@ -1,6 +1,6 @@
-import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
+import { createApi } from '@reduxjs/toolkit/query/react';
 import { DatabaseBusinessProcess, CreateBusinessProcessRequest } from '@/src/lib/models/types';
-import { currentUserId } from '../../app.config';
+import { baseQueryWithAuth } from './baseQuery';
 
 function transformDatabaseProcessToFrontend(dbProcess: any): DatabaseBusinessProcess {
   return {
@@ -18,14 +18,7 @@ function transformDatabaseProcessToFrontend(dbProcess: any): DatabaseBusinessPro
 
 export const businessProcessesApi = createApi({
   reducerPath: 'businessProcessesApi',
-  baseQuery: fetchBaseQuery({
-    baseUrl: '/api/',
-    prepareHeaders: (headers, { getState }) => {
-      // ! To-Do
-      headers.set('x-user-id', currentUserId);
-      return headers;
-    },
-  }),
+  baseQuery: baseQueryWithAuth,
   tagTypes: ['BusinessProcess'],
   endpoints: (builder) => ({
     getBusinessProcesses: builder.query<DatabaseBusinessProcess[], { active?: boolean }>({

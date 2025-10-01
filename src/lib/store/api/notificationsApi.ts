@@ -1,7 +1,7 @@
 // lib/store/api/notificationsApi.ts
-import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
+import { createApi } from '@reduxjs/toolkit/query/react';
 import { DatabaseNotification, CreateNotificationRequest, UpdateNotificationRequest } from '@/src/lib/models/types';
-import { currentUserId } from '../../app.config';
+import { baseQueryWithAuth } from './baseQuery';
 
 function transformDatabaseNotificationToFrontend(dbNotification: any): DatabaseNotification {
   return {
@@ -28,13 +28,7 @@ function transformDatabaseNotificationToFrontend(dbNotification: any): DatabaseN
 
 export const notificationsApi = createApi({
   reducerPath: 'notificationsApi',
-  baseQuery: fetchBaseQuery({
-    baseUrl: '/api/',
-    prepareHeaders: (headers, { getState }) => {
-      headers.set('x-user-id', currentUserId);
-      return headers;
-    },
-  }),
+  baseQuery: baseQueryWithAuth,
   tagTypes: ['Notification', 'UserNotifications'],
   endpoints: (builder) => ({
     getNotifications: builder.query<DatabaseNotification[], {

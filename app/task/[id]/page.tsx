@@ -8,7 +8,8 @@ import { useGetBusinessProcessesQuery } from "@/src/lib/store/api/businessProces
 import TaskDetailsDialog from "@/src/components/Dialogs/TaskDetailsDialog/TaskDetailsDialog";
 import { Button } from "@/src/components/ui/button";
 import { ArrowLeft, Shield } from "lucide-react";
-import { currentUserId } from "@/src/lib/app.config";
+import { useAppSelector } from "@/src/lib/store/hooks";
+import { selectCurrentUser } from "@/src/lib/store/slices/authSlice";
 
 export default function TaskPage() {
   const params = useParams();
@@ -29,7 +30,7 @@ export default function TaskPage() {
     useGetBusinessProcessesQuery({ active: true });
 
   // Current user
-  const currentUser = users.find((user) => user.id === currentUserId);
+  const currentUser = useAppSelector(selectCurrentUser);
 
   // Защита от null currentUser
 

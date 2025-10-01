@@ -1,6 +1,6 @@
 // lib/store/api/tagsApi.ts
-import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
-import { currentUserId } from '../../app.config';
+import { createApi } from '@reduxjs/toolkit/query/react';
+import { baseQueryWithAuth } from './baseQuery';
 
 export interface Tag {
   name: string;
@@ -22,14 +22,7 @@ export interface TagStatistics {
 
 export const tagsApi = createApi({
   reducerPath: 'tagsApi',
-  baseQuery: fetchBaseQuery({
-    baseUrl: '/api/',
-    prepareHeaders: (headers, { getState }) => {
-      // ! To-Do
-      headers.set('x-user-id', currentUserId);
-      return headers;
-    },
-  }),
+  baseQuery: baseQueryWithAuth,
   tagTypes: ['Tag'],
   endpoints: (builder) => ({
     getTags: builder.query<Tag[], {

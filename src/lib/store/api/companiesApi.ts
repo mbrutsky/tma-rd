@@ -1,7 +1,7 @@
 // lib/store/api/companiesApi.ts
-import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
+import { createApi } from '@reduxjs/toolkit/query/react';
 import { DatabaseCompany, CreateCompanyRequest, UpdateCompanyRequest } from '@/src/lib/models/types';
-import { currentUserId } from '../../app.config';
+import { baseQueryWithAuth } from './baseQuery';
 
 function transformDatabaseCompanyToFrontend(dbCompany: any): DatabaseCompany {
   return {
@@ -21,13 +21,7 @@ function transformDatabaseCompanyToFrontend(dbCompany: any): DatabaseCompany {
 
 export const companiesApi = createApi({
   reducerPath: 'companiesApi',
-  baseQuery: fetchBaseQuery({
-    baseUrl: '/api/',
-    prepareHeaders: (headers, { getState }) => {
-      headers.set('x-user-id', currentUserId);
-      return headers;
-    },
-  }),
+  baseQuery: baseQueryWithAuth,
   tagTypes: ['Company'],
   endpoints: (builder) => ({
     getCompanies: builder.query<DatabaseCompany[], void>({
