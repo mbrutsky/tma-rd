@@ -35,7 +35,7 @@ export async function POST(request: NextRequest) {
 
     // Проверяем, существует ли пользователь в БД
     const userResult = await query(
-      'SELECT * FROM users WHERE telegram_user_id = $1',
+      'SELECT * FROM users WHERE tg_user_id = $1',
       [telegramUserId]
     );
 
@@ -78,7 +78,7 @@ export async function POST(request: NextRequest) {
       token,
       user: {
         id: user.id,
-        telegramUserId: user.telegram_user_id,
+        telegramUserId: user.tg_user_id,
         name: user.name,
         username: user.username,
         avatar: user.avatar,

@@ -21,7 +21,7 @@ async function runMigration() {
     
     // Read the SQL migration file
     const migrationSQL = fs.readFileSync(
-      path.join(__dirname, '..', 'migrations', '007_unification_tasks_and_tg-tasks.sql'),
+      path.join(__dirname, '..', 'migrations', '008_add_telegram_auth_fields.sql'),
       'utf8'
     );
     
