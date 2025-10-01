@@ -13,6 +13,9 @@ import {
   selectAuth,
   setAuthLoading
 } from '@/src/lib/store/slices/authSlice';
+import { tasksApi } from '@/src/lib/store/api/tasksApi';
+import { usersApi } from '@/src/lib/store/api/usersApi';
+import { businessProcessesApi } from '@/src/lib/store/api/businessProcessesApi';
 import LoadingScreen from '@/src/components/LoadingScreen';
 
 // Глобальная функция для настройки fetch interceptor
@@ -76,6 +79,10 @@ function AuthProvider({ children }: { children: React.ReactNode }) {
           await dispatch(verifyToken()).unwrap();
           // Настраиваем interceptor после успешной проверки
           setupFetchInterceptor();
+          // Инвалидируем кеш для перезагрузки данных
+          dispatch(tasksApi.util.invalidateTags(['Task']));
+          dispatch(usersApi.util.invalidateTags(['User']));
+          dispatch(businessProcessesApi.util.invalidateTags(['BusinessProcess']));
         } else if (typeof window !== 'undefined' && window.Telegram?.WebApp) {
           // Если токена нет, но мы в Telegram Web App
           const webApp = window.Telegram.WebApp;
@@ -86,6 +93,10 @@ function AuthProvider({ children }: { children: React.ReactNode }) {
             // Настраиваем interceptor сразу после авторизации
             if (result.token) {
               setupFetchInterceptor();
+              // Инвалидируем кеш API для перезагрузки данных с новой авторизацией
+              dispatch(tasksApi.util.invalidateTags(['Task']));
+              dispatch(usersApi.util.invalidateTags(['User']));
+              dispatch(businessProcessesApi.util.invalidateTags(['BusinessProcess']));
             }
           } else {
             // Редирект на страницу авторизации
@@ -114,13 +125,12 @@ function AuthProvider({ children }: { children: React.ReactNode }) {
       setupFetchInterceptor();
       interceptorSetupRef.current = true;
       
-      // Перезагружаем страницу для применения interceptor ко всем запросам
-      // Это нужно только один раз после авторизации
-      if (pathname !== '/auth') {
-        window.location.reload();
-      }
+      // Инвалидируем кеш после настройки interceptor
+      dispatch(tasksApi.util.invalidateTags(['Task']));
+      dispatch(usersApi.util.invalidateTags(['User']));
+      dispatch(businessProcessesApi.util.invalidateTags(['BusinessProcess']));
     }
-  }, [isAuthenticated, token, pathname]);
+  }, [isAuthenticated, token, dispatch]);
 
   // Показываем загрузку во время проверки авторизации
   if (loading && pathname !== '/auth') {

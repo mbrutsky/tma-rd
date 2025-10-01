@@ -5,7 +5,8 @@ import { query } from '@/src/lib/db';
 import { 
   verifyTelegramWebAppData, 
   parseTelegramWebAppData, 
-  createUserToken 
+  createUserToken,
+  verifyUserToken
 } from '@/src/lib/utils/telegram-auth';
 
 export async function POST(request: NextRequest) {
@@ -114,17 +115,17 @@ export async function GET(request: NextRequest) {
 
     const token = authHeader.replace('Bearer ', '');
     
-    // В реальном приложении здесь будет проверка JWT
-    const isValid = await verifyTelegramWebAppData(token);
+    // Проверяем JWT токен, а не Telegram данные
+    const payload = await verifyUserToken(token);
     
-    if (!isValid) {
+    if (!payload) {
       return NextResponse.json(
         { success: false, error: 'Invalid token' },
         { status: 401 }
       );
     }
 
-    return NextResponse.json({ success: true, valid: true });
+    return NextResponse.json({ success: true, valid: true, userId: payload.userId });
   } catch (error) {
     console.error('Token validation error:', error);
     return NextResponse.json(
