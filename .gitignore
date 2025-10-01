@@ -2,3 +2,7 @@ node_modules
 .next
 output.txt
 collect.py
+.env
+docker-compose.postgresql.yaml
+docs
+/docs

@@ -88,3 +88,80 @@
     @apply bg-background text-foreground;
   }
 }
+
+.border-custom {
+  border: 1px solid #bfbfbf;
+  box-shadow: -1px 1px 5px #d1d1d1;
+}
+
+[hidden]:where(:not([hidden="until-found"])) {
+  display: none!important;
+}
+
+div[data-state="open"][data-aria-hidden="true"].data-\[state\=open\]\:animate-in[data-state="open"] {
+  z-index: 100;
+}
+
+div[role="dialog"][data-state="open"].data-\[state\=open\]\:animate-in[data-state="open"] {
+  z-index: 101;
+}
+
+
+
+
+
+
+
+
+
+
+
+/* [app/globals.css] - добавьте в конец файла */
+
+@keyframes pulse-red {
+  0%, 100% {
+    border-color: rgb(239 68 68);
+    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4);
+  }
+  50% {
+    border-color: rgb(220 38 38);
+    box-shadow: 0 0 0 10px rgba(239, 68, 68, 0);
+  }
+}
+
+@keyframes expand-width {
+  0% {
+    width: 0.25rem;
+  }
+  50% {
+    width: 2rem;
+  }
+  100% {
+    width: 0.25rem;
+  }
+}
+
+@keyframes flash {
+  0% {
+    opacity: 0;
+  }
+  50% {
+    opacity: 0.2;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+.animate-pulse-red {
+  animation: pulse-red 2s ease-in-out;
+  border: 2px solid transparent;
+}
+
+.animate-expand-width {
+  animation: expand-width 1s ease-in-out;
+}
+
+.animate-flash {
+  animation: flash 1s ease-in-out;
+}
