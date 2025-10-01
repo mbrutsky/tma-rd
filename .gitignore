@@ -6,3 +6,4 @@ collect.py
 docker-compose.postgresql.yaml
 docs
 /docs
+pnpm-lock.yaml
