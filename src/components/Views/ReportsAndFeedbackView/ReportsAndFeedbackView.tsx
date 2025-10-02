@@ -111,7 +111,7 @@ export default function ReportsAndFeedbackView({
   }
 
   return (
-    <div className="space-y-4 lg:space-y-6 p-2 sm:p-0">
+    <div className="space-y-4 lg:space-y-6 p-2 sm:p-0 pb-[120px]">
       {/* Header with Filters */}
       <div className="flex flex-col gap-4">
         {/* Desktop filters - скрыты на мобильных */}
@@ -147,12 +147,15 @@ export default function ReportsAndFeedbackView({
               size="sm" 
               onClick={handleExportReport}
               disabled={isExporting}
-              className="lg:hidden flex items-center gap-1 px-3"
+              className="lg:hidden flex items-center gap-2 px-3"
             >
               {isExporting ? (
                 <div className="w-4 h-4 border-2 border-gray-400 border-t-transparent rounded-full animate-spin" />
               ) : (
-                <Download className="h-4 w-4" />
+                <>
+                  <Download className="h-4 w-4" />
+                  Экспорт
+                </>
               )}
               <span className="hidden xs:inline">{isExporting ? "Экспорт..." : "Экспорт"}</span>
             </Button>

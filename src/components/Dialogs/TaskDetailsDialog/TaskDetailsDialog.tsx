@@ -431,7 +431,20 @@ const TaskDetailsDialog = memo(function TaskDetailsDialog({
     async (newStatus: TaskStatus) => {
       if (isTaskDeleted) return;
       try {
+        // Для директора при переходе из NEW сразу в IN_PROGRESS
         if (
+          currentTask.status === TaskStatus.NEW &&
+          newStatus === TaskStatus.IN_PROGRESS &&
+          currentUser.role === UserRole.DIRECTOR
+        ) {
+          await addCommentMutation({
+            taskId: currentTask.id,
+            text: "Начал выполнение задачи",
+            isResult: false,
+          }).unwrap();
+        }
+        // Для остальных - стандартный комментарий при ознакомлении
+        else if (
           currentTask.status === TaskStatus.NEW &&
           newStatus === TaskStatus.ACKNOWLEDGED
         ) {
@@ -441,6 +454,7 @@ const TaskDetailsDialog = memo(function TaskDetailsDialog({
             isResult: false,
           }).unwrap();
         }
+        
         await updateTaskStatus({
           id: currentTask.id,
           status: newStatus,
@@ -453,7 +467,7 @@ const TaskDetailsDialog = memo(function TaskDetailsDialog({
         console.error("Error changing status:", error);
       }
     },
-    [isTaskDeleted, currentTask, addCommentMutation, updateTaskStatus]
+    [isTaskDeleted, currentTask, currentUser, addCommentMutation, updateTaskStatus]
   );
 
   // Чек-лист - все блокируется если задача удалена
@@ -744,6 +758,7 @@ const TaskDetailsDialog = memo(function TaskDetailsDialog({
   );
 
   // Кнопки действий - ВСЕ ОТКЛЮЧЕНЫ если задача удалена
+  // НОВАЯ ЛОГИКА ДЛЯ ДИРЕКТОРА
   const availableActions = useMemo(() => {
     if (isTaskDeleted || !permissions.canChangeStatus) return [];
 
@@ -757,12 +772,23 @@ const TaskDetailsDialog = memo(function TaskDetailsDialog({
     switch (currentTask.status) {
       case TaskStatus.NEW:
         if (currentTask.assignees?.some((a) => a.id === currentUser.id)) {
-          actions.push({
-            label: "Ознакомлен и согласен выполнять",
-            icon: <CheckCircle className="h-4 w-4" />,
-            action: () => handleStatusChange(TaskStatus.ACKNOWLEDGED),
-            variant: "default",
-          });
+          // Директор (если он исполнитель) сразу может начать выполнение
+          if (currentUser.role === UserRole.DIRECTOR) {
+            actions.push({
+              label: "Начать выполнение",
+              icon: <Play className="h-4 w-4" />,
+              action: () => handleStatusChange(TaskStatus.IN_PROGRESS),
+              variant: "default",
+            });
+          } else {
+            // Для остальных - сначала нужно ознакомиться
+            actions.push({
+              label: "Ознакомлен и согласен выполнять",
+              icon: <CheckCircle className="h-4 w-4" />,
+              action: () => handleStatusChange(TaskStatus.ACKNOWLEDGED),
+              variant: "default",
+            });
+          }
         }
         break;
       case TaskStatus.ACKNOWLEDGED:
@@ -850,7 +876,6 @@ const TaskDetailsDialog = memo(function TaskDetailsDialog({
                     disabled={false}
                     autoFocus={!isMobile && !isTaskDeleted}
                   />
-                  {/* <Edit className="h-4 w-4 text-gray-400 relative top-[3px]" /> */}
                 </>
               )}
             </div>

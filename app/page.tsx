@@ -510,7 +510,7 @@ export default function TasksApp() {
   const HEADER_MAX_HEIGHT = 81;
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-20">
+    <div className={`min-h-screen bg-gray-50 pb-20 ${activeTab === 'tasks' ? 'overflow-y-hidden' : ''}`}>
       {/* Mobile Header */}
       <div
         className={`bg-white border-b border-gray-200 sticky top-0 z-[20] max-h-[${HEADER_MAX_HEIGHT}px]`}

@@ -211,7 +211,7 @@ export default function SettingsView({ currentUser }: SettingsViewProps) {
         </TabsList>
 
         {/* Общие настройки */}
-        <TabsContent value="general" className="space-y-4">
+        <TabsContent value="general" className="space-y-4 pb-[120px]">
           <PlanInfoSection />
           <UsersManagementSection onEditUser={handleEditUser} />
           <TelegramGroupsSection />

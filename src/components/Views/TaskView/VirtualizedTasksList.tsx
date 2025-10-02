@@ -270,7 +270,7 @@ export default function VirtualizedTasksList({
   );
 
   return (
-    <div className="space-y-4 h-full [&>div]:h-full [&>div>div]:!h-full [&>div>div>div]:!h-full [&>div>div>div>div]:pb-[100px] [&>div>div>div>div]:box-content">
+    <div className="space-y-4 overflow-y-auto h-full [&>div]:h-full [&>div>div]:!h-full [&>div>div>div]:!h-full [&>div>div>div>div]:pb-[100px] [&>div>div>div>div]:box-content">
       <VirtualizedList
         items={virtualItems}
         renderItem={renderItem}

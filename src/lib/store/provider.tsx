@@ -189,30 +189,3 @@ export function Providers({ children }: { children: React.ReactNode }) {
     </Provider>
   );
 }
-
-// Расширяем типы Window для TypeScript
-declare global {
-  interface Window {
-    _originalFetch: typeof fetch;
-    Telegram?: {
-      WebApp: {
-        initData: string;
-        initDataUnsafe: any;
-        ready: () => void;
-        close: () => void;
-        expand: () => void;
-        MainButton: {
-          show: () => void;
-          hide: () => void;
-          setText: (text: string) => void;
-          onClick: (callback: () => void) => void;
-        };
-        BackButton: {
-          show: () => void;
-          hide: () => void;
-          onClick: (callback: () => void) => void;
-        };
-      };
-    };
-  }
-}

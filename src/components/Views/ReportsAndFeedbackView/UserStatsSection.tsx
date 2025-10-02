@@ -26,13 +26,13 @@ export function UserStatsSection({
       </CardHeader>
       <CardContent>
         <div className="space-y-3">
-          {userStats.map((stat, index) => (
+          {userStats.length > 0 ? userStats.map((stat, index) => (
             <UserStatsCard 
               key={stat.user.id} 
               stat={stat} 
               index={index} 
             />
-          ))}
+          )) : 'Нет сотрудников'}
         </div>
       </CardContent>
     </Card>

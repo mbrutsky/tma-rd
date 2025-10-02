@@ -103,18 +103,60 @@ const TaskCard = memo(function TaskCard({
   );
 
   const handleGetTaskLink = useCallback(
-    (e?: React.MouseEvent) => {
-      e?.stopPropagation();
-      const link = `${window.location.origin}/task/${task.id}`;
+  (e?: React.MouseEvent) => {
+    e?.stopPropagation();
+    const link = `https://t.me/robodirector_bot/delegator_controller?startapp=task__${task.id}`;
+    
+    // Проверяем, что мы в Telegram Mini App
+    if (window.Telegram?.WebApp) {
+      // Используем Telegram API для чтения из буфера обмена
+      // После чего записываем нашу ссылку
+      try {
+        // Telegram WebApp API для копирования
+        const textarea = document.createElement('textarea');
+        textarea.value = link;
+        textarea.style.position = 'fixed';
+        textarea.style.opacity = '0';
+        document.body.appendChild(textarea);
+        
+        textarea.select();
+        textarea.setSelectionRange(0, 99999);
+        
+        const successful = document.execCommand('copy');
+        document.body.removeChild(textarea);
+        
+        if (successful) {
+          // Показываем уведомление через Telegram API
+          window.Telegram.WebApp.showAlert('Ссылка скопирована в буфер обмена');
+          
+          // Тактильная обратная связь
+          if (window.Telegram.WebApp.HapticFeedback) {
+            window.Telegram.WebApp.HapticFeedback.notificationOccurred('success');
+          }
+          
+          // Отправляем кастомное событие
+          const event = new CustomEvent("task-link-copied", { detail: { link } });
+          window.dispatchEvent(event);
+        }
+      } catch (err) {
+        console.error('Ошибка копирования:', err);
+        window.Telegram.WebApp.showAlert('Не удалось скопировать ссылку');
+      }
+    } else {
+      // Fallback для обычного браузера
       navigator.clipboard.writeText(link).then(() => {
         const event = new CustomEvent("task-link-copied", { detail: { link } });
         window.dispatchEvent(event);
+      }).catch(err => {
+        console.error('Ошибка копирования:', err);
       });
-      setIsMenuOpen(false);
-      suppressCardClicks();
-    },
-    [task.id, setIsMenuOpen, suppressCardClicks]
-  );
+    }
+    
+    setIsMenuOpen(false);
+    suppressCardClicks();
+  },
+  [task.id, setIsMenuOpen, suppressCardClicks]
+);
 
   const handleReturnToWork = useCallback(() => {
     const historyAction: Omit<DatabaseHistoryEntry, "id" | "timestamp"> = {
@@ -283,30 +325,30 @@ const TaskCard = memo(function TaskCard({
         <LinkIcon className="h-5 w-5 mr-3" />
         Скопировать ссылку
       </Button>,
-      <Button
-        key="copy-task"
-        variant="ghost"
-        className="w-full justify-start h-12"
-        onClick={handleCopyTask}
-      >
-        <Copy className="h-5 w-5 mr-3" />
-        Копировать задачу
-      </Button>
+      // <Button
+      //   key="copy-task"
+      //   variant="ghost"
+      //   className="w-full justify-start h-12"
+      //   onClick={handleCopyTask}
+      // >
+      //   <Copy className="h-5 w-5 mr-3" />
+      //   Копировать задачу
+      // </Button>
     );
 
-    if (!task.is_deleted) {
-      buttons.push(
-        <Button
-          key="reminder"
-          variant="ghost"
-          className="w-full justify-start h-12"
-          onClick={() => handleSendReminder(15)}
-        >
-          <Bell className="h-5 w-5 mr-3" />
-          Отправить напоминание
-        </Button>
-      );
-    }
+    // if (!task.is_deleted) {
+    //   buttons.push(
+    //     <Button
+    //       key="reminder"
+    //       variant="ghost"
+    //       className="w-full justify-start h-12"
+    //       onClick={() => handleSendReminder(15)}
+    //     >
+    //       <Bell className="h-5 w-5 mr-3" />
+    //       Отправить напоминание
+    //     </Button>
+    //   );
+    // }
 
     if (canReturnToWork()) {
       buttons.push(
