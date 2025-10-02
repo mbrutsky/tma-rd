@@ -32,6 +32,7 @@ import { useTaskCardLogic } from "./hooks/useTaskCardLogic";
 import TaskCardAssignee from "./TaskCardAssignee";
 import TaskCardFooter from "./TaskCardFooter";
 import TaskCardStatus from "./TaskCardStatus";
+import { copyTextToClipboard } from '@telegram-apps/sdk';
 
 interface TaskCardProps {
   task: DatabaseTask;
@@ -102,61 +103,24 @@ const TaskCard = memo(function TaskCard({
     [setIsMenuOpen, suppressCardClicks]
   );
 
-  const handleGetTaskLink = useCallback(
-  (e?: React.MouseEvent) => {
-    e?.stopPropagation();
-    const link = `https://t.me/robodirector_bot/delegator_controller?startapp=task__${task.id}`;
-    
-    // Проверяем, что мы в Telegram Mini App
-    if (window.Telegram?.WebApp) {
-      // Используем Telegram API для чтения из буфера обмена
-      // После чего записываем нашу ссылку
-      try {
-        // Telegram WebApp API для копирования
-        const textarea = document.createElement('textarea');
-        textarea.value = link;
-        textarea.style.position = 'fixed';
-        textarea.style.opacity = '0';
-        document.body.appendChild(textarea);
-        
-        textarea.select();
-        textarea.setSelectionRange(0, 99999);
-        
-        const successful = document.execCommand('copy');
-        document.body.removeChild(textarea);
-        
-        if (successful) {
-          // Показываем уведомление через Telegram API
-          window.Telegram.WebApp.showAlert('Ссылка скопирована в буфер обмена');
-          
-          // Тактильная обратная связь
-          if (window.Telegram.WebApp.HapticFeedback) {
-            window.Telegram.WebApp.HapticFeedback.notificationOccurred('success');
-          }
-          
-          // Отправляем кастомное событие
-          const event = new CustomEvent("task-link-copied", { detail: { link } });
-          window.dispatchEvent(event);
-        }
-      } catch (err) {
-        console.error('Ошибка копирования:', err);
-        window.Telegram.WebApp.showAlert('Не удалось скопировать ссылку');
-      }
-    } else {
-      // Fallback для обычного браузера
-      navigator.clipboard.writeText(link).then(() => {
-        const event = new CustomEvent("task-link-copied", { detail: { link } });
-        window.dispatchEvent(event);
-      }).catch(err => {
-        console.error('Ошибка копирования:', err);
-      });
-    }
-    
-    setIsMenuOpen(false);
-    suppressCardClicks();
-  },
-  [task.id, setIsMenuOpen, suppressCardClicks]
-);
+const handleGetTaskLink = useCallback(async (e?: React.MouseEvent) => {
+  e?.stopPropagation();
+  const link = `https://t.me/robodirector_bot/delegator_controller?startapp=task__${task.id}`;
+
+  const ok = await copyTextToClipboard(link).catch(() => false);
+
+  if (ok) {
+    window.Telegram?.WebApp?.showAlert?.("Ссылка скопирована");
+    window.Telegram?.WebApp?.HapticFeedback?.notificationOccurred?.("success");
+    window.dispatchEvent(new CustomEvent("task-link-copied", { detail: { link } }));
+  } else {
+    window.prompt?.("Скопируйте ссылку:", link);
+    window.Telegram?.WebApp?.HapticFeedback?.notificationOccurred?.("warning");
+  }
+
+  setIsMenuOpen(false);
+  suppressCardClicks();
+}, [task.id, setIsMenuOpen, suppressCardClicks]);
 
   const handleReturnToWork = useCallback(() => {
     const historyAction: Omit<DatabaseHistoryEntry, "id" | "timestamp"> = {
